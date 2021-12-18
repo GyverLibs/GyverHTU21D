@@ -15,6 +15,7 @@
 
     Версии:
     v1.0 - релиз
+    v1.1 - совместимость esp8266
 */
 
 #ifndef _GyverHTU21D_h
@@ -164,7 +165,7 @@ private:
     uint8_t readCfgReg(void) {
         Wire.beginTransmission(HTU21D_IIC_ADDR);
         Wire.write(HTU21D_CFG_WRITE_CMD);
-        if (Wire.endTransmission()) return;
+        if (Wire.endTransmission()) return 0;
         Wire.requestFrom(HTU21D_IIC_ADDR, 1);
         return Wire.read();
     }

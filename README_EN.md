@@ -1,3 +1,5 @@
+This is an automatic translation, may be incorrect in some places. See sources and examples!
+
 # GyverHTU21D
 Lightweight library for temperature and humidity sensor HTU21D
 - Asynchronous reading

@@ -42,7 +42,7 @@
 class GyverHTU21D {
 public:
     // запуск и проверка наличия датчика
-    bool begin(void) {
+    bool begin() {
         Wire.begin();
         bufH = bufT = 300;  // сброс
         return request(HTU21D_RESET_CMD);
@@ -61,22 +61,22 @@ public:
     }
     
     // Состояние питания
-    bool powerGood(void) {
-        return (readCfgReg() & 0b01000000);
+    bool powerGood() {
+        return !(readCfgReg() & 0b01000000);
     }
 
     // Запросить температуру
-    bool requestTemperature(void) {
+    bool requestTemperature() {
         return request(HTU21D_TRIG_T_CMD);
     }
     
     // Запросить влажность
-    bool requestHumidity(void) {
+    bool requestHumidity() {
         return request(HTU21D_TRIG_H_CMD);
     }
     
     // Прочитать температуру
-    bool readTemperature(void) {
+    bool readTemperature() {
         uint16_t data = readValue();
         if (data == 0xffff) return 0;
         else bufT = (0.002681f * data - 46.85f);
@@ -84,36 +84,34 @@ public:
     }
     
     // Прочитать влажность
-    bool readHumidity(void) {
+    bool readHumidity() {
         uint16_t data = readValue();
         if (data == 0xffff) return 0;
-        else bufH = ((0.001907 * (data ^ 0x02)) - 6);
+        else bufH = ((0.001907 * (data & 0xfffc)) - 6);
         return 1;
     }
     
     // Получить температуру
-    float getTemperature(void) {
+    float getTemperature() {
         return bufT;
     }
     
     // Получить влажность
-    float getHumidity(void) {
+    float getHumidity() {
         return bufH;
     }
     
     // прочитать температуру (блокирующая функция)
-    float getTemperatureWait() {
+    float getTemperatureWait(uint16_t tout = 100) {
         request(HTU21D_TRIG_T_HOLD_CMD);
-        while(!digitalRead(SCL));
-        readTemperature();
+        if (waitSCL(tout)) readTemperature();
         return bufT;
     }
     
     // прочитать флажность (блокирующая функция)
-    float getHumidityWait() {
+    float getHumidityWait(uint16_t tout = 100) {
         request(HTU21D_TRIG_H_HOLD_CMD);
-        while(!digitalRead(SCL));
-        readHumidity();
+        if (waitSCL(tout)) readHumidity();
         return bufH;
     }
     
@@ -162,12 +160,21 @@ private:
     }
     
     // Чтение регистра конфигурации
-    uint8_t readCfgReg(void) {
+    uint8_t readCfgReg() {
         Wire.beginTransmission(HTU21D_IIC_ADDR);
-        Wire.write(HTU21D_CFG_WRITE_CMD);
+        Wire.write(HTU21D_CFG_READ_CMD);
         if (Wire.endTransmission()) return 0;
         Wire.requestFrom(HTU21D_IIC_ADDR, 1);
         return Wire.read();
+    }
+
+    bool waitSCL(uint16_t tout) {
+        uint32_t tmr = millis();
+        while (!digitalRead(SCL)) {
+            if (millis() - tmr >= tout) return 0;
+            yield();
+        }
+        return 1;
     }
 
     // Расчет CRC по полиному HTU21D

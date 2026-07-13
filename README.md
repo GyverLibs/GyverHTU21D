@@ -55,7 +55,7 @@ GyverHTU21D htu;
 bool begin();                       // запуск и проверка наличия датчика
 void setHeater(bool state);         // Включение / выключение подогрева
 bool powerGood();                   // Состояние питания
-void setResolution(uint8_t mode);   // Установка разрешения
+void setResolution(HTURes_t mode);  // Установка разрешения
 
 // Разрешение:
 HTU21D_RES_HIGH     // Высокое разрешение (см. таблицу ниже) - по умолчанию

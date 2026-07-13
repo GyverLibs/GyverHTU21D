@@ -56,7 +56,7 @@ GyverHTU21D htu;
 bool begin();                       // launch and check for sensor availability
 void setHeater(bool state);         // Turning on/off heating
 bool powerGood();                   // Nutrition status
-void setResolution(uint8_t mode);   // Installation of authorization
+void setResolution(HTURes_t mode);  // Installation of authorization
 
 // Permission:
 HTU21D_RES_HIGH     // High resolution (see table below) - by default
